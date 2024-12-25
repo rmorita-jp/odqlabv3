@@ -8,25 +8,6 @@ function gainfinal = odqgain(Q,steptime,plotflag)
 %
 %See also compg, odq, odqreal, odqcost, odqstb.
 
-% -------------------------------------------------------------------------
-% Copyright is with the following author. 
-% (C) 2008 Ryosuke Morita, 
-%          Kyoto University;
-%          Gokasho, Uji, Kyoto 611-0011, Japan
-%          morita@robot.kuass.kyoto-u.ac.jp
-% -------------------------------------------------------------------------
-% Legal Note:
-%           
-%     (a)  This program is a free software. 
-%          
-%     (b)  This program is distributed according to GNU General Public
-%          License, i.e., it is allowed to use WITHOUT ANY WARRANTY; 
-%          without even the implied warranty of
-%          MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
-%          See the GNU General Public License for more details.
-% 
-% -------------------------------------------------------------------------
-
 %%%%%set default steptime%%%%%
 if (nargin==2)
     plotflag='f';
@@ -38,6 +19,16 @@ if (nargin==1)
     steptime=inf;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+if isinf(steptime)
+    strarch=computer('arch');
+    switch strarch
+        case {'win64' , 'glnxa64' , 'maci64'}
+            steptime=double(intmax('int64'));
+        otherwise
+            steptime=double(intmax('int32'));
+    end
+end
 
 finaltime=steptime;     %initilize
 

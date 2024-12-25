@@ -1,4 +1,4 @@
-function [Q Hk_new] = odqreal(G,Hk,dim)
+function [Q, Hk_new] = odqreal(G,Hk,dim)
 %ODQREAL Compose Optimal Dynamic Quantizer from brock hankel matrix
 %
 %Q = odqreal(G,Hk,dim) composes Q from brock hankel matrix, Hk.H is structure
@@ -6,25 +6,6 @@ function [Q Hk_new] = odqreal(G,Hk,dim)
 %(Hk.H = Hk.Wo * Hk.S * Hk.Wc)
 %
 %See also compg, odq, odqgain, odqcost, odqstb.
-
-% -------------------------------------------------------------------------
-% Copyright is with the following author. 
-% (C) 2008 Ryosuke Morita, 
-%          Kyoto University;
-%          Gokasho, Uji, Kyoto 611-0011, Japan
-%          morita@robot.kuass.kyoto-u.ac.jp
-% -------------------------------------------------------------------------
-% Legal Note:
-%           
-%     (a)  This program is a free software. 
-%          
-%     (b)  This program is distributed according to GNU General Public
-%          License, i.e., it is allowed to use WITHOUT ANY WARRANTY; 
-%          without even the implied warranty of
-%          MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
-%          See the GNU General Public License for more details.
-% 
-% -------------------------------------------------------------------------
 
 %%%%%set parameters%%%%%           
 %Tdash=floor(T/2)+1;
