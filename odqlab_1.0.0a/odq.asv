@@ -412,7 +412,7 @@ end
 %hist(diag(H.S))
 end
 
-function [Q E] = odqanly(G,con)
+function [Q E_low] = odqanly(G,con)
 %ODQANLY Optimal Dynamic Quantizer with analytic method
 %
 %This function is not to use alone.
@@ -458,7 +458,7 @@ elseif strcmpi(con,'ff')
         C_F = F_ss.C;
 
         % Compute quantization error
-        E = norm(abs(C_F * B_F),"inf") * d/2;
+        E_low = norm(abs(C_F * B_F),"inf") * d/2;
 
     % Case 2: One unstable zero
     elseif numel(unstable_zeros) == 1
@@ -476,7 +476,7 @@ elseif strcmpi(con,'ff')
         C_F = F_ss.C;
 
         % Compute quantization error
-        E = (1 + abs(a)) * abs(C_F * B_F) * d/2;
+        E_low = (1 + abs(a)) * abs(C_F * B_F) * d/2;
 
     % Case 3: Multiple unstable zeros or unsupported cases
     else
@@ -550,32 +550,19 @@ elseif strcmpi(con,'GQ') || strcmpi(con,'fboq')
         C_F1 = F1_ss.C;
 
         % Compute quantization error
-        E = norm(abs(C_F * B_F),"inf") * d/2;
+        E_low = norm(abs(C_F * B_F),"inf") * d/2;
 
     % Case 2: One unstable zero
     elseif numel(unstable_zeros) == 1
         a = unstable_zeros(1);  % First unstable zero
         F2 = (z - a) / z;  % Transfer function with unstable zero
-        F1 = minreal(tf / F2);  % Remaining part, simplified
-        F_ss = ss(F1);  % Convert to state-space representation
+        F = minreal(tf / F2);  % Remaining part, simplified
+        F_ss = ss(F);  % Convert to state-space representation
         B_F = F_ss.B;
         C_F = F_ss.C;
 
         % Compute quantization error
-        E = (1 + abs(a)) * abs(C_F * B_F) * d/2;
-
-    % Case 3: two unstable zero
-    elseif numel(unstable_zeros) == 2 && sign(unstable_zeros(1)) ~= sign(unstable_zeros(2))
-        a1 = unstable_zeros(1);  % First unstable zero
-        a2 = unstable_zeros(2); % Second unstable zero
-        F2 = (z - a1)*(z - a2) / z^2;  % Transfer function with unstable zero
-        F1 = minreal(tf / F2);  % Remaining part, simplified
-        F_ss = ss(F1);  % Convert to state-space representation
-        B_F = F_ss.B;
-        C_F = F_ss.C;
-
-        % Compute quantization error
-        E = (1 + abs(a)) * abs(C_F * B_F) * d/2;
+        E_low = (1 + abs(a)) * abs(C_F * B_F) * d/2;
 
     % Case 3: Multiple unstable zeros or unsupported cases
     else

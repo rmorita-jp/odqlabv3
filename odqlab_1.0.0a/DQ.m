@@ -76,6 +76,7 @@ d    = odqdata.d;
 gain = odqdata.gain;
 E    = odqdata.E;
 Hk   = odqdata.Hk;
+con  = odqdata.con;
 
 stb=odqstb(Q);
 if size(Q.a,1)>1000
@@ -89,7 +90,15 @@ staticQ.b2 = zeros(1,size(G.c2,1));
 staticQ.c  = zeros(size(G.c2,1),1);
 E_upper = odqcost(G,staticQ,d,inf);
 
-E_low   = norm(G.c1*G.b2,inf)*d/2;
+if strcmpi(con,'fbiq')
+    E_low   = norm(G.c1*G.b2,inf)*d/2;
+elseif strcmpi(con,'ff')
+    E_low   = norm(G.c1*G.b2,inf)*d/2;
+elseif strcmpi(con,'GQ')
+
+else 
+    error('error whitch block');
+end
 
 if stb==1
     set(handles.val_stability,'string','STABLE')
