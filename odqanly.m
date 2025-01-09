@@ -1,4 +1,4 @@
-function Q = odqanly(G,con,d)
+function [Q,E] = odqanly(G,con,d)
 %ODQANLY Optimal Dynamic Quantizer with analytic method
 %
 %This function is not to use alone.
@@ -44,7 +44,7 @@ if strcmpi(con,'ff')|| strcmpi(con,'fboq')
 
     % Case 1: No unstable zeros
     if isempty(unstable_zeros)
-        %{
+        
         % Count time delay (poles at z=0)
         n_time_delay = sum(poles == 0);
         % Define z as a discrete-time variable
@@ -57,8 +57,8 @@ if strcmpi(con,'ff')|| strcmpi(con,'fboq')
         C_F = F_ss.C;
 
         % Compute quantization error
-        %E = norm(abs(C_F * B_F),"inf") * d/2;
-        %}
+        E = norm(abs(C_F * B_F),"inf") * d/2;
+        
 
         Q.a  = G.aa;
         Q.b1 = -G.b2;
@@ -152,7 +152,7 @@ elseif strcmpi(con,'GQ') || strcmpi(con,'fboq')
 
     % Case 1: No unstable zeros
     if isempty(unstable_zeros)
-        %{
+        
         F2 = pinv(G.c1*G.b2)*tf_G1;  
         F1 = G.c1*G.b2;  % Remaining part
         F1_ss = ss(F1);  % Convert to state-space representation
@@ -165,11 +165,11 @@ elseif strcmpi(con,'GQ') || strcmpi(con,'fboq')
         D_F2 = F2_ss.D;
 
         % Compute quantization error
-        %for i=1:10000
-        %sum_CAB = sum_CAB + abs(C_F2*(A_F2)^(i-1)*B_F2);
-        %end
-        %E = (abs(D_F2) + sum_CAB)*d/2;
-        %}
+        for i=1:10000
+        sum_CAB = sum_CAB + abs(C_F2*(A_F2)^(i-1)*B_F2);
+        end
+        E = (abs(D_F2) + sum_CAB)*d/2;
+        
 
         Q.a  = G.aa;
         Q.b1 = -G.b2;
