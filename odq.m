@@ -413,6 +413,10 @@ end
 %hist(diag(H.S))
 end
 
+
+
+
+%{
 function [Q, E] = odqanly(G,con,d)
 %ODQANLY Optimal Dynamic Quantizer with analytic method
 %
@@ -603,7 +607,6 @@ elseif strcmpi(con,'GQ') || strcmpi(con,'fboq')
             
             Q = [];
             E = inf;
-            return;
         end
         if D_F1 ~= 0
             
@@ -611,7 +614,6 @@ elseif strcmpi(con,'GQ') || strcmpi(con,'fboq')
             
             Q = [];
             E = inf;
-            return;
         end
         % Construct dynamic quantizer Q
         Q.a = A_F1;
@@ -654,7 +656,6 @@ elseif strcmpi(con,'GQ') || strcmpi(con,'fboq')
             
             Q = [];
             E = inf;
-            return;
         end
         if D_F1 ~= 0
             
@@ -662,7 +663,6 @@ elseif strcmpi(con,'GQ') || strcmpi(con,'fboq')
             
             Q = [];
             E = inf;
-            return;
         end
         % Construct dynamic quantizer Q
         Q.a = A_F1;
@@ -675,14 +675,9 @@ elseif strcmpi(con,'GQ') || strcmpi(con,'fboq')
         Q = [];
         E = inf;
         
-            disp('Unsupported case: multiple unstable zeros or other issues.');
+        disp('Unsupported case: multiple unstable zeros or other issues.');
         
-        return;
     end
-
-    
-else
-    er
 end
-
 end
+%}
