@@ -90,19 +90,15 @@ staticQ.b2 = zeros(1,size(G.c2,1));
 staticQ.c  = zeros(size(G.c2,1),1);
 E_upper = odqcost(G,staticQ,d,inf);
 
-%{
 if strcmpi(con,'fbiq')
     E_low   = norm(G.c1*G.b2,inf)*d/2;
 elseif strcmpi(con,'ff')
     E_low   = norm(G.c1*G.b2,inf)*d/2;
 elseif strcmpi(con,'GQ')
-    
+    E_low   = norm(G.c1*G.b2,inf)*d/2;
 else 
     error('error whitch block');
 end
-%}
-
-E_low   = norm(G.c1*G.b2,inf)*d/2;
 
 if stb==1
     set(handles.val_stability,'string','STABLE')

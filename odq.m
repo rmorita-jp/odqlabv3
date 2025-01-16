@@ -147,13 +147,13 @@ G.aa = G.a+G.b2*G.c2;    %convert to closed loop
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%initialize%%%%%
-if strcmpi(solver,'linprog') || strcmpi(solver,'cplex') || strcmpi(solver, 'gurobi')
+if strcmpi(solver,'linprog') || strcmpi(solver,'cplex') 
     if gamma.wv==inf
         vectorf = zeros( 1 + m*m*T + p*m*(T-1) , 1 );
     else
         vectorf = zeros( 1 + m*m*T*2 + p*m*(T-1) , 1 );
     end
-elseif strcmpi(solver,'sdpt3') || strcmpi(solver,'sedumi')
+elseif strcmpi(solver,'sdpt3') || strcmpi(solver,'sedumi')|| strcmpi(solver, 'gurobi')
     if gamma.wv==inf
         vectorf = zeros( 1 + m*m*T + p*m*(T-1) , 1 );
     else
@@ -329,7 +329,7 @@ switch lower(solver)
         model.sense = '<';            % 制約条件の向き
         model.modelsense = 'min';     % 最小化問題
 
-        params.OutputFlag = 0;        % 出力表示オフ
+        params.OutputFlag = 1;        % 出力表示オン
 
         % Solve with Gurobi
         result = gurobi(model, params);
