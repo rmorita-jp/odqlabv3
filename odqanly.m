@@ -135,16 +135,18 @@ if strcmpi(con,'ff')|| strcmpi(con,'fboq')
     
 
 elseif strcmpi(con,'GQ') || strcmpi(con,'fboq')
-    sys_G1 = ss(G.a, G.b2, G.c1, G.d1, 0.1);
+    sys_G1 = ss(G.aa, G.b2, G.c1, G.d1, 0.1);
     %sys_G2 = ss(G.a, G.b1+G.b2*G.d2, G.c1, G.d1, 0.1);
+    Ts = 0.1;
     
     % Transfer function of the system
     tf_G1 = tf(sys_G1);
     %tf_G2 = tf(sys_G2);
 
     % Calculate zeros and poles of the transfer function
-    zeros_ = tzero(tf_G1);
+    %zeros_ = tzero(tf_G1);
     %poles = pole(tf_G1);
+    [zeros_, poles, K] = zpkdata(tf_G1,'v');
 
     % Identify unstable zeros (|z| > 1)
     unstable_zeros = zeros_(abs(zeros_) > 1);
@@ -165,6 +167,7 @@ elseif strcmpi(con,'GQ') || strcmpi(con,'fboq')
         D_F2 = F2_ss.D;
 
         % Compute quantization error
+        sum_CAB = 0;
         for i=1:10000
         sum_CAB = sum_CAB + abs(C_F2*(A_F2)^(i-1)*B_F2);
         end
@@ -181,7 +184,9 @@ elseif strcmpi(con,'GQ') || strcmpi(con,'fboq')
     % Case 2: One unstable zero
     elseif numel(unstable_zeros) == 1
         a = unstable_zeros(1);  % First unstable zero
-        F2 = (z - a) / z;  % Transfer function with unstable zero
+        num = [K*1 K*(-a)];
+        den = [1 0];
+        F2 = tf(num,den,Ts);  % Transfer function with unstable zero
         F1 = minreal(tf_G1 / F2);  % Remaining part, simplified
         F1_ss = ss(F1);  % Convert to state-space representation
         F2_ss = ss(F2);
@@ -193,6 +198,7 @@ elseif strcmpi(con,'GQ') || strcmpi(con,'fboq')
         D_F2 = F2_ss.D;
 
         % Compute quantization error
+        sum_CAB = 0;
         for i=1:10000
         sum_CAB = sum_CAB + abs(C_F2*(A_F2)^(i-1)*B_F2);
         end
@@ -232,7 +238,9 @@ elseif strcmpi(con,'GQ') || strcmpi(con,'fboq')
     elseif numel(unstable_zeros) == 2 && sign(unstable_zeros(1)) ~= sign(unstable_zeros(2))
         a1 = unstable_zeros(1);  % First unstable zero
         a2 = unstable_zeros(2); % Second unstable zero
-        F2 = (z - a1)*(z - a2) / z^2;  % Transfer function with unstable zero
+        num = [K*1 K*(-a1-a2) K*(-a1)*(-a2)];
+        den = [1 0];
+        F2 = tf(num,den,Ts);  % Transfer function with unstable zero
         F1 = minreal(tf / F2);  % Remaining part, simplified
         F1_ss = ss(F1);  % Convert to state-space representation
         F2_ss = ss(F2);
@@ -244,6 +252,7 @@ elseif strcmpi(con,'GQ') || strcmpi(con,'fboq')
         D_F2 = F2_ss.D;
 
         % Compute quantization error
+        sum_CAB = 0;
         for i=1:10000
         sum_CAB = sum_CAB + abs(C_F2*(A_F2)^(i-1)*B_F2);
         end
