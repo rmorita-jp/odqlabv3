@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.apptool" plugin-version="1.0">
-  <configuration build-checksum="2434685419" file="C:\Users\芳谷拓海\Documents\GitHub\odqlabv3\odqlab_App.prj" location="C:\Users\芳谷拓海\Documents\GitHub\odqlabv3" name="odqlab_App" target="target.mlapps" target-name="アプリのパッケージ化">
+  <configuration build-checksum="144852911" file="C:\Users\芳谷拓海\Documents\GitHub\odqlabv3\odqlab_App.prj" location="C:\Users\芳谷拓海\Documents\GitHub\odqlabv3" name="odqlab_App" target="target.mlapps" target-name="アプリのパッケージ化">
     <param.appname>odqlab_App</param.appname>
     <param.authnamewatermark />
     <param.email />
@@ -17,7 +17,7 @@
       <item>win64</item>
     </param.platforms>
     <param.output>${PROJECT_ROOT}</param.output>
-    <param.guid>ccfb4811-7002-49a7-8eda-533227b6a869</param.guid>
+    <param.guid>93eeff44-0f69-4098-9fff-d3ef0307e023</param.guid>
     <unset>
       <param.authnamewatermark />
       <param.email />
@@ -34,7 +34,7 @@
       <param.output />
     </unset>
     <fileset.main>
-      <file>${PROJECT_ROOT}\odqlab_App2.mlapp</file>
+      <file>${PROJECT_ROOT}\odqlab_App.mlapp</file>
     </fileset.main>
     <fileset.depfun>
       <file>C:\gurobi1200\win64\matlab\gurobi.m</file>
