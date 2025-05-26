@@ -1,4 +1,4 @@
-function [Q, E, Hk, gain] = odq(G,T,d,gamma,dim,solver,con)
+function [Q, E, Hk, gain] = odq(G,T,d,gamma,dim,solver,connection)
 %ODQ Optimal Dynamic Quantizer
 %
 %Q = odq(G,T,d) is ODQ for G with evaluation interval 'T'.
@@ -57,7 +57,7 @@ else
 end
 while (endflag == 0)
     if (m >= p && mstkn == 0)
-        Q = odqanly(G,con,d);
+        Q = odqanly(G,connection,d,T);
         %Hk = 'null';
         Hk=odqhnkl_anly(Q);
         if max(abs(eig(Q.a+Q.b2*Q.c)))<=1
@@ -89,7 +89,7 @@ end
 
 if endflag==1
     %E=odqcost(G,Q,d,T);
-    [Q,E]=odqanly(G,con,d);
+    [Q,E]=odqanly(G,connection,d,T);
 elseif endflag==2
     E=fval*d/2;
 end
@@ -106,8 +106,8 @@ end
 
 %%%%%%Display Result%%%%%
 fprintf('\n%s\n','RESULT')
-disp('con')
-disp(con)
+disp('connection')
+disp(connection)
 disp('Q')
 disp(Q)
 if (skipflag==1)
@@ -150,14 +150,22 @@ G.aa = G.a+G.b2*G.c2;    %convert to closed loop
 if strcmpi(solver,'linprog') || strcmpi(solver,'cplex') 
     if gamma.wv==inf
         vectorf = zeros( 1 + m*m*T + p*m*(T-1) , 1 );
+        
     else
         vectorf = zeros( 1 + m*m*T*2 + p*m*(T-1) , 1 );
     end
-elseif strcmpi(solver,'sdpt3') || strcmpi(solver,'sedumi')|| strcmpi(solver, 'gurobi')
+elseif strcmpi(solver,'sdpt3') || strcmpi(solver,'sedumi') 
     if gamma.wv==inf
         vectorf = zeros( 1 + m*m*T + p*m*(T-1) , 1 );
     else
         vectorf = sparse(zeros( 1 + m*m*T*2 + p*m*(T-1) + p + p*m*(T-1)*2 + m + m*m*T*2 , 1 ));
+    end
+elseif  strcmpi(solver,'mosek')  || strcmpi(solver, 'gurobi')
+    if gamma.wv==inf
+        vectorf = zeros( 1 + m*m*T + p*m*(T-1) , 1 );
+        
+    else
+        vectorf = zeros( 1 + m*m*T*2 + p*m*(T-1) , 1 );
     end
 else
     error('wrong solver')
@@ -205,7 +213,7 @@ if strcmpi(solver,'linprog') || strcmpi(solver,'cplex')
             zeros( m*m*T , 1 )      -eye( m*m*T )      -eye( m*m*T )             zeros( m*m*T , m*p*(T-1) ) ;
             ];
     end
-elseif strcmpi(solver,'sdpt3') || strcmpi(solver,'sedumi') || strcmpi(solver,'gurobi')
+elseif strcmpi(solver,'sdpt3') || strcmpi(solver,'sedumi')
     if gamma.wv==inf
         matrixA = [
             -ones( p , 1 )         zeros( p , m*m*T )  eye_sumE                 ;
@@ -220,6 +228,23 @@ elseif strcmpi(solver,'sdpt3') || strcmpi(solver,'sedumi') || strcmpi(solver,'gu
             zeros( m , 1 )         zeros( m , m*m*T )   eye_sumH                 zeros( m , m*p*(T-1) )     zeros(m        ,p) zeros(m        ,p*m*(T-1)) zeros(m        ,p*m*(T-1))             eye(m) zeros(m        ,m*m*T) zeros(m        ,m*m*T);  % sum(Hbar)<gamma-1
             zeros( m*m*T , 1 )       eye( m*m*T )      -eye( m*m*T )             zeros( m*m*T , m*p*(T-1) ) zeros(m*m*T    ,p) zeros(m*m*T    ,p*m*(T-1)) zeros(m*m*T    ,p*m*(T-1)) zeros(m*m*T    ,m)             eye(m*m*T) zeros(m*m*T    ,m*m*T);  % H-Hbar   <0
             zeros( m*m*T , 1 )      -eye( m*m*T )      -eye( m*m*T )             zeros( m*m*T , m*p*(T-1) ) zeros(m*m*T    ,p) zeros(m*m*T    ,p*m*(T-1)) zeros(m*m*T    ,p*m*(T-1)) zeros(m*m*T    ,m) zeros(m*m*T    ,m*m*T)             eye(m*m*T);  % -H-Hbar  <0
+            ]);
+    end
+elseif  strcmpi(solver,'mosek')|| strcmpi(solver, 'gurobi') 
+    if gamma.wv==inf
+        matrixA = sparse([
+            -ones( p , 1 )         zeros( p , m*m*T )  eye_sumE                 ;
+            zeros( p*m*(T-1) , 1 )   PHI              -eye( m*p*(T-1) )         ;
+            zeros( p*m*(T-1) , 1 )  -PHI              -eye( m*p*(T-1) )         ;
+            ]);
+    else
+        matrixA = sparse([
+            -ones( p , 1 )         zeros( p , m*m*T ) zeros( p , m*m*T )           eye_sumE                 ;
+            zeros( p*m*(T-1) , 1 )   PHI              zeros( p*m*(T-1) , m*m*T )  -eye( m*p*(T-1) )         ;
+            zeros( p*m*(T-1) , 1 )  -PHI              zeros( p*m*(T-1) , m*m*T )  -eye( m*p*(T-1) )         ;
+            zeros( m , 1 )         zeros( m , m*m*T )   eye_sumH                 zeros( m , m*p*(T-1) )     ;
+            zeros( m*m*T , 1 )       eye( m*m*T )      -eye( m*m*T )             zeros( m*m*T , m*p*(T-1) ) ;
+            zeros( m*m*T , 1 )      -eye( m*m*T )      -eye( m*m*T )             zeros( m*m*T , m*p*(T-1) ) ;
             ]);
     end
 end
@@ -242,7 +267,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%finalize%%%%%%%%%%
-if strcmpi(solver,'linprog') || strcmpi(solver,'cplex')
+if strcmpi(solver,'linprog') || strcmpi(solver,'cplex')  || strcmpi(solver,'mosek') || strcmpi(solver, 'gurobi')
     if gamma.wv==inf
         vectorb = [ 
             -abs( G.c1*G.b2 )*ones( m , 1 ) ;
@@ -258,7 +283,7 @@ if strcmpi(solver,'linprog') || strcmpi(solver,'cplex')
             zeros( m*m*T*2,1 )              ;
             ];
     end
-elseif strcmpi(solver,'sdpt3') || strcmpi(solver,'sedumi') || strcmpi(solver,'gurobi')
+elseif strcmpi(solver,'sdpt3') || strcmpi(solver,'sedumi') 
     if gamma.wv==inf
         vectorb = [
             -abs( G.c1*G.b2 )*ones( m , 1 ) ;
@@ -322,19 +347,22 @@ switch lower(solver)
     case 'gurobi'
         disp('Solving LP problem (Gurobi)...');
         pause(0.1);
-        % Gurobi input
+        
         model.obj = vectorf;          % 目的関数の係数
-        model.A = sparse(matrixA);    % 制約行列
+        model.A = matrixA;            % 制約行列
         model.rhs = vectorb;          % 制約条件の右辺
         model.sense = '<';            % 制約条件の向き
+        %model.lb = zeros(size(model.A,2), 1);
+        model.ub = inf(size(model.A,2), 1);
         model.modelsense = 'min';     % 最小化問題
 
-        params.OutputFlag = 1;        % 出力表示オン
+        %params.NumericFocus = 3;      % 数値安定性を重視
+        %params.InfUnbdInfo = 1;       % 非実行可能の情報を取得
+        %params.OutputFlag = 1;        % 出力表示オン
 
-        % Solve with Gurobi
-        result = gurobi(model, params);
+        %result = gurobi(model, params);
+        result = gurobi(model);
 
-        % Process result
         if strcmp(result.status, 'OPTIMAL')
             x = result.x;
             fval = vectorf' * x;
@@ -342,9 +370,25 @@ switch lower(solver)
         else
             error('Gurobi failed to find an optimal solution.');
         end
+    case 'mosek'
+        disp('Solving LP problem (Mosek)...');
+        
+        prob.c = vectorf;           %目的関数
+        prob.a = matrixA;           %制約行列
+        prob.blc = -inf(size(prob.a,1), 1);    %制約の下限 (`≤` 制約なので -inf)
+        prob.buc = vectorb;          %制約の上限 (`rhs`)
+        %prob.blx = zeros(size(prob.a,2), 1);          %変数の下限
+        prob.bux = inf(size(prob.a,2), 1);      %変数の上限 (なし)
 
-    otherwise
-        error('Unknown solver specified. Supported solvers: linprog, gurobi');
+        [r, res] = mosekopt('minimize', prob);
+
+        if r == 0 
+            x = res.sol.bas.xx;     %変数 x の最適値
+            fval = vectorf' * x;
+            exitflag = 1;
+        else
+            disp('MOSEK failed to find an optimal solution.');
+        end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
